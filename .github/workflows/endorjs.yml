@@ -1,0 +1,38 @@
+name: "Endor Labs - Example Scan of JavaScript"
+on:
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  create_project_javascript:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # Required by actions/checkout@v4 to checkout a private repository
+      actions: read
+      repository-projects: read
+      pull-requests: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+      - name: 'Use Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+        working-directory: ./demo3/my-vulnerable-nodejs-app
+      - run: npm run build --if-present
+        working-directory: ./demo3/my-vulnerable-nodejs-app
+      - name: 'Scan JS with Endor Labs'
+        uses: endorlabs/github-action@main # This workflow uses the Endor Labs GitHub action to scan.
+        with:
+          namespace: 'moduscreate_pcl_sandbox'
+          pr: false
+          scan_secrets: true
+          scan_dependencies: true
+          log_verbose: true
+          scan_summary_output_type: 'table'
+          sarif_file: 'findings.sarif'
+      - name: 'Upload findings to GitHub'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'findings.sarif'

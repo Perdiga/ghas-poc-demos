@@ -1,0 +1,25 @@
+name: CodeQL - Sync Alerts to Jira Issues
+
+on:
+    workflow_dispatch:
+    schedule:
+     - cron: '*/30 * * * *' # trigger synchronization every 30 minutes
+
+jobs:
+  terraform:
+    name: Sync alerts to Jira issues
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+        
+    steps:
+      - name: Sync alerts to Jira issues
+        uses: github/ghas-jira-integration@v1.2.4
+        with:
+          jira_url: 'https://moduscreate-poc.atlassian.net'
+          jira_user: '${{ secrets.JIRA_USER }}'
+          jira_token: '${{ secrets.JIRA_TOKEN }}'
+          github_token: '${{ secrets.PERSONAL_ACCESS_TOKEN }}'
+          jira_project: 'MSP'
+          sync_direction: 'gh2jira'
